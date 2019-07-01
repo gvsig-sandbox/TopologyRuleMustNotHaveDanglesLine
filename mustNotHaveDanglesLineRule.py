@@ -39,6 +39,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
     #Feature feature1
 
     try:
+      print "Empieza con: ", feature1.Name
       logger("si", LOGGER_INFO)
       #store2 = self.getDataSet2().getFeatureStore()
       #tolerance = self.getTolerance()
@@ -54,6 +55,13 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
       #lineTolerance = line.buffer(tolerance) #polygon
       numVertexLine = line.getNumVertices()
       
+      dictionary = {}
+      
+      for i in range(0, numVertexLine):
+        dictionary[i] = True
+      print dictionary
+
+      
       #if( point==None ):
        # return
       #logger("1", LOGGER_INFO)
@@ -66,45 +74,45 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
           #FeatureReference reference
           # Misma feature
           #logger("ref"+str(reference), LOGGER_INFO)
-          if (reference.equals(feature1.getReference())):
-            continue;
+          
           
           feature = reference.getFeature()
           otherLine = feature.getDefaultGeometry()
           numVertexOtherLine = otherLine.getNumVertices()
-
+          
+          print "Analizando: ", feature1.Name, " con ", feature.Name
           #if line.touches(otherLine):
-            #print "toca"
-
+          
+          if (reference.equals(feature1.getReference())):
+                print "Misma entidad"
+                continue;
+                
           for i in range(0, numVertexLine):
-            cont = 0
             for j in range(0, numVertexOtherLine):
               if line.getVertex(i) == otherLine.getVertex(j):
-                print "Comparten punto"
-                break
+                print "Comparten punto", line.getVertex(i), otherLine.getVertex(j)
+                dictionary[i] = False
+                
               else:
-                print "Posible error"
-                cont = cont + 1
-                if cont == 2:
-                  error = line.getVertex(i)
-                  print "El error es: ", error
-                  report.addLine(self,
-                    theDataSet,
-                    None,
-                    line,
-                    error,
-                    feature1.getReference(),
-                    None,
-                    False,
-                    "The point is dangling"
-                  )
-                  #break
-                else:
-                  continue
+                print "Posible error", line.getVertex(i), otherLine.getVertex(j)
+                
+        print "Para: ", feature1.get("Name"), "Los errores son:", dictionary
+        
+        for d in dictionary.keys():
+          if dictionary[d] == True:
+            error = line.getVertex(d)
+            print "El error es: ", error
+            report.addLine(self,
+              theDataSet,
+              None,
+              line,
+              error,
+              feature1.getReference(),
+              None,
+              False,
+              "The point is dangling"
+            )
             
-          #else:
-            #print "No toca por sus extremos"
-          break
       else:
         logger("else", LOGGER_INFO)
         self.expression.setPhrase(
@@ -132,7 +140,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
               feature1.getReference(),
               None,
               False,
-              "The point is not disjoint."
+              "The point is dangling"
             )
         logger("end", LOGGER_INFO)
     except: # Exception as ex:
