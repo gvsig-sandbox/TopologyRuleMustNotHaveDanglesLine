@@ -28,7 +28,7 @@ class MustNotHaveDanglesLineRuleFactory(AbstractTopologyRuleFactory):
       self,
       "MustNotHaveDanglesLine",
       "Must Not Have Dangles", 
-      "Requires that points be separated spatially from other points in the same feature class. The overlapping points are errors. This rule ensures that points are not coincident or duplicated within the same feature class", 
+      "Requires ...", 
       ListBuilder().add(Geometry.TYPES.LINE).add(Geometry.TYPES.MULTILINE).asList()
       )
   def createRule(self, plan, dataSet1, dataSet2, tolerance):

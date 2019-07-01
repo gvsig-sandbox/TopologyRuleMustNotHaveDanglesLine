@@ -73,32 +73,38 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
           otherLine = feature.getDefaultGeometry()
           numVertexOtherLine = otherLine.getNumVertices()
 
-          if line.touches(otherLine):
-            print "toca"
+          #if line.touches(otherLine):
+            #print "toca"
 
-            for i in range(0, numVertexLine):
-              for j in range(0, numVertexOtherLine):
-                if line.getVertex(i) == otherLine.getVertex(j):
-                  print "Comparten punto"
-                else:
-                  print "Posible error"
+          for i in range(0, numVertexLine):
+            cont = 0
+            for j in range(0, numVertexOtherLine):
+              if line.getVertex(i) == otherLine.getVertex(j):
+                print "Comparten punto"
+                break
+              else:
+                print "Posible error"
+                cont = cont + 1
+                if cont == 2:
                   error = line.getVertex(i)
                   print "El error es: ", error
                   report.addLine(self,
                     theDataSet,
                     None,
-                    error,
+                    line,
                     error,
                     feature1.getReference(),
                     None,
                     False,
-                    "The point is not disjoint."
+                    "The point is dangling"
                   )
-                  break
+                  #break
+                else:
+                  continue
             
-          else:
-            print "No toca por sus extremos"
-            
+          #else:
+            #print "No toca por sus extremos"
+          break
       else:
         logger("else", LOGGER_INFO)
         self.expression.setPhrase(
