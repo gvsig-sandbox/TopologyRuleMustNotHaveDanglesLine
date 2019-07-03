@@ -56,9 +56,10 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
       numVertexLine = line.getNumVertices()
       
       dictionary = {}
+
+      dictionary[0] = True
+      dictionary[numVertexLine-1] = True
       
-      for i in range(0, numVertexLine):
-        dictionary[i] = True
       print dictionary
 
       
