@@ -88,9 +88,9 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
                 print "Misma entidad"
                 continue;
                 
-          for i in range(0, numVertexLine):
+          for i in dictionary:
             for j in range(0, numVertexOtherLine):
-              if line.getVertex(i) == otherLine.getVertex(j):
+              if line.getVertex(i).intersects(otherLine):
                 print "Comparten punto", line.getVertex(i), otherLine.getVertex(j)
                 dictionary[i] = False
                 
