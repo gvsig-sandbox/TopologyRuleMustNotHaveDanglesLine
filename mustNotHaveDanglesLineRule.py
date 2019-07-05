@@ -39,7 +39,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
     #Feature feature1
 
     try:
-      print "Empieza con: ", feature1.Name
+      print "Starts with: ", feature1.Name
       logger("si", LOGGER_INFO)
       #store2 = self.getDataSet2().getFeatureStore()
       #tolerance = self.getTolerance()
@@ -54,55 +54,46 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
       line = feature1.getDefaultGeometry()
       #lineTolerance = line.buffer(tolerance) #polygon
       numVertexLine = line.getNumVertices()
-      
-      dictionary = {}
-
-      dictionary[0] = True
-      dictionary[numVertexLine-1] = True
-      
-      print dictionary
-
-      
-      #if( point==None ):
-       # return
-      #logger("1", LOGGER_INFO)
-      
-      theDataSet = self.getDataSet1()
-      #logger("2", LOGGER_INFO)
-      if theDataSet.getSpatialIndex() != None:
-        #logger("if", LOGGER_INFO)
-        for reference in theDataSet.query(line):
-          #FeatureReference reference
-          # Misma feature
-          #logger("ref"+str(reference), LOGGER_INFO)
-          
-          
-          feature = reference.getFeature()
-          otherLine = feature.getDefaultGeometry()
-          numVertexOtherLine = otherLine.getNumVertices()
-          
-          print "Analizando: ", feature1.Name, " con ", feature.Name
-          #if line.touches(otherLine):
-          
-          if (reference.equals(feature1.getReference())):
-                print "Misma entidad"
-                continue;
-                
-          for i in dictionary:
-            for j in range(0, numVertexOtherLine):
-              if line.getVertex(i).intersects(otherLine):
-                print "Comparten punto", line.getVertex(i), otherLine.getVertex(j)
-                dictionary[i] = False
-                
-              else:
-                print "Posible error", line.getVertex(i), otherLine.getVertex(j)
-                
-        print "Para: ", feature1.get("Name"), "Los errores son:", dictionary
+      lista = [line.getVertex(0), line.getVertex(numVertexLine-1)]
+      for vertex in lista:
+        noError = False
+        print "One end of the line ", feature1.get("Name"), "is: ", vertex
         
-        for d in dictionary.keys():
-          if dictionary[d] == True:
-            error = line.getVertex(d)
-            print "El error es: ", error
+        #if( point==None ):
+         # return
+        #logger("1", LOGGER_INFO)
+        
+        theDataSet = self.getDataSet1()
+        #logger("2", LOGGER_INFO)
+        if theDataSet.getSpatialIndex() != None:
+          #logger("if", LOGGER_INFO)
+          for reference in theDataSet.query(vertex):
+            #FeatureReference reference
+            # Misma feature
+            #logger("ref"+str(reference), LOGGER_INFO)
+            
+            
+            feature = reference.getFeature()
+            otherLine = feature.getDefaultGeometry()
+            #numVertexOtherLine = otherLine.getNumVertices()
+            
+            print "Analyzing vertex of ", feature1.Name, " with line ", feature.Name
+            #if line.touches(otherLine):
+            
+
+            if (reference.equals(feature1.getReference())):
+              print "Same entity"
+              continue;
+              
+            if (vertex.intersects(otherLine) and not line.equals(otherLine)):
+              print "Intersects vertex", feature1.Name, " with line ", feature.Name
+              noError = True
+              break
+
+                
+          if noError == False:
+            error = vertex
+            print "The mistake is: ", error
             report.addLine(self,
               theDataSet,
               None,
@@ -113,6 +104,9 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
               False,
               "The point is dangling"
             )
+
+          else:
+            print "Intersecta"
             
       else:
         logger("else", LOGGER_INFO)
