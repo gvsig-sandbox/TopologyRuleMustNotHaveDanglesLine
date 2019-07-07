@@ -55,6 +55,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
       #lineTolerance = line.buffer(tolerance) #polygon
       numVertexLine = line.getNumVertices()
       lista = [line.getVertex(0), line.getVertex(numVertexLine-1)]
+      
       for vertex in lista:
         noError = False
         print "One end of the line ", feature1.get("Name"), "is: ", vertex
@@ -83,7 +84,21 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
 
             if (reference.equals(feature1.getReference())):
               print "Same entity"
-              continue;
+              print numVertexLine
+              #continue;
+              if numVertexLine > 2:
+                endVertex = line.getVertex(0)
+                cloneLine = line.cloneGeometry()
+                cloneLine.removeVertex(0)
+                if cloneLine.intersects(endVertex):
+                  print "Intersects with itself"
+                  noError = True
+                else:
+                  endVertex = line.getVertex(numVertexLine-1)
+                  cloneLine.removeVertex(numVertexLine-1)
+                  if cloneLine.intersects(endVertex):
+                    print "Intersects with itself"
+                    noError = true
               
             if (vertex.intersects(otherLine) and not line.equals(otherLine)):
               print "Intersects vertex", feature1.Name, " with line ", feature.Name
