@@ -59,7 +59,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
       for vertex in lista:
         noError = False
         print "One end of the line ", feature1.get("Name"), "is: ", vertex
-        
+        print type(vertex)
         #if( point==None ):
          # return
         #logger("1", LOGGER_INFO)
@@ -88,17 +88,25 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
               #continue;
               if numVertexLine > 2:
                 endVertex = line.getVertex(0)
+                print type(endVertex)
                 cloneLine = line.cloneGeometry()
-                cloneLine.removeVertex(0)
-                if cloneLine.intersects(endVertex):
-                  print "Intersects with itself"
-                  noError = True
-                else:
-                  endVertex = line.getVertex(numVertexLine-1)
-                  cloneLine.removeVertex(numVertexLine-1)
-                  if cloneLine.intersects(endVertex):
+                if lista.index(vertex) == 0:
+                  cloneLine.removeVertex(0)
+                  if cloneLine.intersects(vertex):
                     print "Intersects with itself"
-                    noError = true
+                    noError = True
+                    
+                  else:
+                    print "No intersects with itself"
+                else:
+                  cloneLine.removeVertex(numVertexLine-1)
+                  if cloneLine.intersects(vertex):
+                    print "Intersects with itself"
+                    noError = True
+                    
+                  else:
+                    print "No intersects with itself"
+                    
               
             if (vertex.intersects(otherLine) and not line.equals(otherLine)):
               print "Intersects vertex", feature1.Name, " with line ", feature.Name
@@ -106,8 +114,10 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
               break
 
                 
+          logger("previous report", LOGGER_INFO)
           if noError == False:
             error = vertex
+            logger("report", LOGGER_INFO)
             print "The mistake is: ", error
             report.addLine(self,
               theDataSet,
