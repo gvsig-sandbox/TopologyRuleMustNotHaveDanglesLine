@@ -37,15 +37,24 @@ class ExtendAction(AbstractTopologyRuleAction):
     try:
     
       #logger("2", LOGGER_INFO)
+      dataSet = rule.getDataSet1()
+      
       while True:
         try:
           d = float(commonsdialog.inputbox("Enter a distance", title = "", messageType = IDEA, initialValue = "", root = None))
           print "Dialog box: ", d
+          if d == 0:
+            envelope = dataSet.getFeatureStore().getEnvelope()
+
+            if not envelope.isEmpty():
+              d = envelope.getLowerCorner().distance(envelope.getUpperCorner())
+              print d
+            else:
+              d = 999999999
           break
         except ValueError:
           print("The entered values are not correct. Try again")
 
-      #dataSet.delete(line.getFeature1())
       vertexError = geom.createGeometryFromWKT(line.getData())
       
       reference = line.getFeature1()
@@ -96,10 +105,10 @@ class ExtendAction(AbstractTopologyRuleAction):
         if slope==math.inf and ang==90:
           vertex = createPoint(vertexError.getX(), vertexError.getY() + d)
 
-      cloneLine = lineToExtend.cloneGeometry()
-      cloneLine.addVertex(vertex)
+      segment = geoManager.createLine(subtype)
+      segment.addVertex(vertexError)
+      segment.addVertex(vertex)
       
-      dataSet = rule.getDataSet1()
       store = dataSet.getFeatureStore()
       features = store.getFeatureSet()
 
@@ -108,10 +117,9 @@ class ExtendAction(AbstractTopologyRuleAction):
         otherLine = feature.getDefaultGeometry()
         print otherLine
 
-        if (cloneLine.intersects(otherLine) and not cloneLine.equals(otherLine)):
-#          print "Intersects cloneLine", feature1.Name, " with otherline ", feature.Name
-          iP = cloneLine.intersection(otherLine)
-          dist = cloneLine.distance(otherLine)
+        if (segment.intersects(otherLine) and not segment.equals(otherLine)):
+          iP = segment.intersection(otherLine)
+          dist = segment.distance(otherLine)
 
           if dist<distance:
             distance = dist
