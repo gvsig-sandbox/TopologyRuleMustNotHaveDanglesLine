@@ -56,6 +56,7 @@ class ExtendAction(AbstractTopologyRuleAction):
           print("The entered values are not correct. Try again")
 
       vertexError = geom.createGeometryFromWKT(line.getData())
+      print vertexError
       
       reference = line.getFeature1()
       feature1 = reference.getFeature()
@@ -66,44 +67,72 @@ class ExtendAction(AbstractTopologyRuleAction):
       extendedLine = geoManager.createLine(subtype)
 
       numVertex = lineToExtend.getNumVertices()
+      print "1"
 
       if lineToExtend.getVertex(0) == vertexError:
+        print "if"
         try:
+          print "2"
           slope = (lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())/(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
+          print "3"
         except ZeroDivisionError:
           slope = float('inf')
-        ang = math.degrees(math.atan(slope))
-#        print ang
+          
+        if slope>0:
+          ang = math.degrees(math.atan(slope))
+        else:
+          ang = math.degrees(math.atan(slope)) + 180
+        print ang
 
         if slope>0 and 0<ang<90:
+          print "1. 90"
           vertex = createPoint(vertexError.getX() - d*math.cos(ang), vertexError.getY() - d*math.sin(ang))
 
         if slope<0 and 90<ang<180:
+          print "1. 180"
           vertex = createPoint(vertexError.getX() + d*math.cos(ang), vertexError.getY() + d*math.sin(ang))
 
         if slope==0 and ang==0:
+          print "1. 0"
           vertex = createPoint(vertexError.getX() - d, vertexError.getY())
 
         if slope==float('inf') and ang==90:
+          print "1. inf"
 #          print "Entra en opcion de pendiente infinita y angulo 90 grados"
           vertex = createPoint(D2, vertexError.getX(), vertexError.getY() + d)
           print vertex
 
       else:
-        slope = (lineToExtend.getVertex(numVertex-2).getY()-lineToExtend.getVertex(-1).getY())/(lineToExtend.getVertex(numVertex-2).getX()-lineToExtend.getVertex(-1).getX())
-        ang = math.atan(slope)
+        print "else"
+        try:
+          slope = (lineToExtend.getVertex(numVertex-2).getY()-lineToExtend.getVertex(numVertex-1).getY())/(lineToExtend.getVertex(numVertex-2).getX()-lineToExtend.getVertex(numVertex-1).getX())
+          print slope
+        except ZeroDivisionError:
+          slope = float('inf')
+          
+        if slope>0:
+          ang = math.degrees(math.atan(slope))
+        else:
+          ang = math.degrees(math.atan(slope)) + 180
+        print ang
+        print "4"
 
         if slope>0 and 0<ang<90:
-          vertex = createPoint(vertexError.getX() + d*math.cos(ang), vertexError.getY() + d*math.sin(ang))
+          print "2. 90"
+          vertex = createPoint(D2, vertexError.getX() + d*math.cos(ang), vertexError.getY() + d*math.sin(ang))
 
         if slope<0 and 90<ang<180:
-          vertex = createPoint(vertexError.getX() + d*math.cos(ang), vertexError.getY() - d*math.sin(ang))
+          print "2. 180"
+          vertex = createPoint(D2, vertexError.getX() + d*math.cos(ang), vertexError.getY() - d*math.sin(ang))
+          print vertex
 
         if slope==0 and ang==0:
-          vertex = createPoint(vertexError.getX() + d, vertexError.getY())
+          print "2. 0"
+          vertex = createPoint(D2, vertexError.getX() + d, vertexError.getY())
 
-        if slope==math.inf and ang==90:
-          vertex = createPoint(vertexError.getX(), vertexError.getY() + d)
+        if slope==float('inf') and ang==90:
+          print "2. inf"
+          vertex = createPoint(D2, vertexError.getX(), vertexError.getY() + d)
 
       segment = geoManager.createLine(subtype)
       segment.addVertex(vertexError)
