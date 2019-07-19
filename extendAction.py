@@ -69,47 +69,46 @@ class ExtendAction(AbstractTopologyRuleAction):
       numVertex = lineToExtend.getNumVertices()
       print "1"
 
-      if True:
-        print "if"
-        try:
-          print "2"
-          if lineToExtend.getVertex(0) == vertexError:
-            Ay = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
-            Ax = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
-          else:
-            Ay = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
-            Ax = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
-          slope = Ay/Ax
-          print "3"
-        except ZeroDivisionError:
-          if Ay>0:
-            slope = float('inf')
-          else:
-            slope = float('-inf')
-          
-        if slope>0:
-          if Ay>0:
-            ang = math.degrees(math.atan(slope))
-          else:
-            ang = math.degrees(math.atan(slope)) + 180
+      print "if"
+      try:
+        print "2"
+        if lineToExtend.getVertex(0) == vertexError:
+          Ay = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
+          Ax = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
         else:
-          if Ay>0:
-            ang = math.degrees(math.atan(slope)) + 180
-          else:
-            ang = math.degrees(math.atan(slope)) + 360
-        if slope == 0:
-          if Ax > 0:
-            ang = math.degrees(math.atan(slope))
-          else:
-            ang = math.degrees(math.atan(slope)) + 180
-        if slope == float('inf'):
+          Ay = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
+          Ax = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
+        slope = Ay/Ax
+        print "3"
+      except ZeroDivisionError:
+        if Ay>0:
+          slope = float('inf')
+        else:
+          slope = float('-inf')
+        
+      if slope>0:
+        if Ay>0:
           ang = math.degrees(math.atan(slope))
-        if slope == float('-inf'):
+        else:
+          ang = math.degrees(math.atan(slope)) + 180
+      else:
+        if Ay>0:
+          ang = math.degrees(math.atan(slope)) + 180
+        else:
+          ang = math.degrees(math.atan(slope)) + 360
+      if slope == 0:
+        if Ax > 0:
           ang = math.degrees(math.atan(slope))
-        print ang
+        else:
+          ang = math.degrees(math.atan(slope)) + 180
+      if slope == float('inf'):
+        ang = math.degrees(math.atan(slope))
+      if slope == float('-inf'):
+        ang = math.degrees(math.atan(slope))
+      print ang
 
-        vertex = createPoint(D2, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
-        print vertex
+      vertex = createPoint(D2, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
+      print vertex
         
 
       segment = geoManager.createLine(subtype)
