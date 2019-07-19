@@ -69,70 +69,48 @@ class ExtendAction(AbstractTopologyRuleAction):
       numVertex = lineToExtend.getNumVertices()
       print "1"
 
-      if lineToExtend.getVertex(0) == vertexError:
+      if True:
         print "if"
         try:
           print "2"
-          slope = (lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())/(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
+          if lineToExtend.getVertex(0) == vertexError:
+            Ay = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
+            Ax = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
+          else:
+            Ay = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
+            Ax = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
+          slope = Ay/Ax
           print "3"
         except ZeroDivisionError:
-          slope = float('inf')
+          if Ay>0:
+            slope = float('inf')
+          else:
+            slope = float('-inf')
           
         if slope>0:
-          ang = math.degrees(math.atan(slope))
+          if Ay>0:
+            ang = math.degrees(math.atan(slope))
+          else:
+            ang = math.degrees(math.atan(slope)) + 180
         else:
-          ang = math.degrees(math.atan(slope)) + 180
+          if Ay>0:
+            ang = math.degrees(math.atan(slope)) + 180
+          else:
+            ang = math.degrees(math.atan(slope)) + 360
+        if slope == 0:
+          if Ax > 0:
+            ang = math.degrees(math.atan(slope))
+          else:
+            ang = math.degrees(math.atan(slope)) + 180
+        if slope == float('inf'):
+          ang = math.degrees(math.atan(slope))
+        if slope == float('-inf'):
+          ang = math.degrees(math.atan(slope))
         print ang
 
-        if slope>0 and 0<ang<90:
-          print "1. 90"
-          vertex = createPoint(vertexError.getX() - d*math.cos(ang), vertexError.getY() - d*math.sin(ang))
-
-        if slope<0 and 90<ang<180:
-          print "1. 180"
-          vertex = createPoint(vertexError.getX() + d*math.cos(ang), vertexError.getY() + d*math.sin(ang))
-
-        if slope==0 and ang==0:
-          print "1. 0"
-          vertex = createPoint(vertexError.getX() - d, vertexError.getY())
-
-        if slope==float('inf') and ang==90:
-          print "1. inf"
-#          print "Entra en opcion de pendiente infinita y angulo 90 grados"
-          vertex = createPoint(D2, vertexError.getX(), vertexError.getY() + d)
-          print vertex
-
-      else:
-        print "else"
-        try:
-          slope = (lineToExtend.getVertex(numVertex-2).getY()-lineToExtend.getVertex(numVertex-1).getY())/(lineToExtend.getVertex(numVertex-2).getX()-lineToExtend.getVertex(numVertex-1).getX())
-          print slope
-        except ZeroDivisionError:
-          slope = float('inf')
-          
-        if slope>0:
-          ang = math.degrees(math.atan(slope))
-        else:
-          ang = math.degrees(math.atan(slope)) + 180
-        print ang
-        print "4"
-
-        if slope>0 and 0<ang<90:
-          print "2. 90"
-          vertex = createPoint(D2, vertexError.getX() + d*math.cos(ang), vertexError.getY() + d*math.sin(ang))
-
-        if slope<0 and 90<ang<180:
-          print "2. 180"
-          vertex = createPoint(D2, vertexError.getX() + d*math.cos(ang), vertexError.getY() - d*math.sin(ang))
-          print vertex
-
-        if slope==0 and ang==0:
-          print "2. 0"
-          vertex = createPoint(D2, vertexError.getX() + d, vertexError.getY())
-
-        if slope==float('inf') and ang==90:
-          print "2. inf"
-          vertex = createPoint(D2, vertexError.getX(), vertexError.getY() + d)
+        vertex = createPoint(D2, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
+        print vertex
+        
 
       segment = geoManager.createLine(subtype)
       segment.addVertex(vertexError)
@@ -144,16 +122,19 @@ class ExtendAction(AbstractTopologyRuleAction):
       distance = float('inf')
       for feature in features:
         otherLine = feature.getDefaultGeometry()
-        print otherLine
+        print feature.Name
 
-        if (segment.intersects(otherLine) and not segment.equals(otherLine)):
+        if (segment.intersects(otherLine) and not vertexError.intersects(otherLine)):
           iP = segment.intersection(otherLine)
-          dist = segment.distance(otherLine)
+          dist = vertexError.distance(otherLine)
+          print iP
+          print dist
 
           if dist<distance:
             distance = dist
             intersectionPoint = iP
             print "Intersection Point is ", intersectionPoint
+            print distance
 
       print "final intersection ", intersectionPoint
 
