@@ -3,6 +3,7 @@
 import gvsig
 from gvsig import geom
 from gvsig.geom import *
+from java.lang import Throwable
 from gvsig import commonsdialog
 from gvsig.commonsdialog import *
 import math
@@ -44,13 +45,16 @@ class ExtendAction(AbstractTopologyRuleAction):
           d = float(commonsdialog.inputbox("Enter a distance", title = "", messageType = IDEA, initialValue = "", root = None))
           print "Dialog box: ", d
           if d == 0:
+            print "entra en d=0"
             envelope = dataSet.getFeatureStore().getEnvelope()
 
-            if not envelope.isEmpty():
+            if envelope != None or not envelope.isEmpty():
+              print "entra en if del envelope"
               d = envelope.getLowerCorner().distance(envelope.getUpperCorner())
               print d
             else:
-              d = 999999999
+              print "entra al else del raise"
+              raise Throwable("Not valid envelope")
           break
         except ValueError:
           print("The entered values are not correct. Try again")
@@ -69,13 +73,14 @@ class ExtendAction(AbstractTopologyRuleAction):
       numVertex = lineToExtend.getNumVertices()
       print "1"
 
-      print "if"
       try:
         print "2"
         if lineToExtend.getVertex(0) == vertexError:
+          typeLine = "start"
           Ay = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
           Ax = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
         else:
+          typeLine = "end"
           Ay = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
           Ax = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
         slope = Ay/Ax
@@ -91,23 +96,23 @@ class ExtendAction(AbstractTopologyRuleAction):
           ang = math.degrees(math.atan(slope))
         else:
           ang = math.degrees(math.atan(slope)) + 180
-      else:
+      elif slope<0:
         if Ay>0:
           ang = math.degrees(math.atan(slope)) + 180
         else:
           ang = math.degrees(math.atan(slope)) + 360
-      if slope == 0:
+      elif slope == 0:
         if Ax > 0:
           ang = math.degrees(math.atan(slope))
         else:
           ang = math.degrees(math.atan(slope)) + 180
-      if slope == float('inf'):
+      elif slope == float('inf'):
         ang = math.degrees(math.atan(slope))
-      if slope == float('-inf'):
+      elif slope == float('-inf'):
         ang = math.degrees(math.atan(slope))
       print ang
 
-      vertex = createPoint(D2, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
+      vertex = createPoint(subtype, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
       print vertex
         
 
@@ -137,11 +142,15 @@ class ExtendAction(AbstractTopologyRuleAction):
 
       print "final intersection ", intersectionPoint
 
+      if typeLine == "start":
+        extendedLine.addVertex(intersectionPoint)
+
       for i in range(0, numVertex):
 #        print i
         extendedLine.addVertex(lineToExtend.getVertex(i))
 
-      extendedLine.addVertex(intersectionPoint)
+      if typeLine == "end":
+        extendedLine.addVertex(intersectionPoint)
 #      for j in range(0, extendedLine.getNumVertices()):
 #        print extendedLine.getVertex(j)
 
@@ -149,7 +158,7 @@ class ExtendAction(AbstractTopologyRuleAction):
       feature1.set("GEOMETRY", extendedLine)
       dataSet.update(feature1)
       
-      
+
     except:
       ex = sys.exc_info()[1]
       print "Error", ex.__class__.__name__, str(ex)
