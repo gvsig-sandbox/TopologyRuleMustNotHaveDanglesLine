@@ -48,7 +48,7 @@ class ExtendAction(AbstractTopologyRuleAction):
             print "entra en d=0"
             envelope = dataSet.getFeatureStore().getEnvelope()
 
-            if envelope != None or not envelope.isEmpty():
+            if envelope is not None or not envelope.isEmpty():
               print "entra en if del envelope"
               d = envelope.getLowerCorner().distance(envelope.getUpperCorner())
               print d
@@ -109,7 +109,7 @@ class ExtendAction(AbstractTopologyRuleAction):
       elif slope == float('inf'):
         ang = math.degrees(math.atan(slope))
       elif slope == float('-inf'):
-        ang = math.degrees(math.atan(slope))
+        ang = math.degrees(math.atan(slope)) + 360
       print ang
 
       vertex = createPoint(subtype, vertexError.getX() + d*math.cos(math.radians(ang)), vertexError.getY() + d*math.sin(math.radians(ang)))
