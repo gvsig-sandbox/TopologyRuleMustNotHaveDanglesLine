@@ -96,7 +96,7 @@ class SnapAction(AbstractTopologyRuleAction):
       
       disToSegment = float('inf')
       for i in range(0, numVertexOtherLine-1):
-        print "indice ", i
+        print "index ", i
         vertex1 = geoNearest.getVertex(i)
         vertex2 = geoNearest.getVertex(i+1)
         segment = geoManager.createLine(subtype)
@@ -123,13 +123,13 @@ class SnapAction(AbstractTopologyRuleAction):
       if dToVertex1<d or dToVertex2<d:
         if dToVertex1<dToVertex2:
           vertex = segmentNearest.getVertex(0)
-          print "vertice 1"
+          print "vertex 1"
         elif dToVertex1>dToVertex2:
           vertex = segmentNearest.getVertex(1)
-          print "vertice 2"
+          print "vertex 2"
         elif dToVertex1 == dToVertex2:
           vertex = segmentNearest.getVertex(0)
-          print "vertice 1"
+          print "vertex 1"
       elif disToSegment < d:
         print "perpendicular"
         try:
@@ -137,9 +137,8 @@ class SnapAction(AbstractTopologyRuleAction):
         except ZeroDivisionError:
           slope1 = float('inf')
         b1 = segmentNearest.getVertex(0).getY() - slope1 * segmentNearest.getVertex(0).getX()
-        print "recta 1"
+        print "straight line 1"
         print slope1, b1
-#        y = slope1*x + b1
 
         try:
           slope2 = -(1/slope1)
@@ -147,9 +146,8 @@ class SnapAction(AbstractTopologyRuleAction):
           slope2 = float('-inf')
         b2 = vertexError.getY() - slope2 * vertexError.getX()
 
-        print "recta 2"
+        print "straight line 2"
         print slope2, b2
-#        y = slope2*x + b2
 
         x = (b2-b1)/(slope1-slope2)
         if math.isnan(x):
@@ -160,41 +158,43 @@ class SnapAction(AbstractTopologyRuleAction):
         print "x", x
         y = slope1*x + b1
         if math.isnan(y):
-          print "isnany"
           y = vertexError.getY()
         print "y", y
 
-#        pointIntersection = createPoint(subtype, x[0], y[1])
         vertex = createPoint(subtype, x, y)
         print vertex
 
-      if lineToSnap.getVertex(0) == vertexError:
-        print "start"
-#      if typeLine == "start":
-        snappedLine.addVertex(vertex)
+      else:
+        vertex = None
 
-      for i in range(0, numVertex):
-        print i
-        if lineToSnap.getVertex(i) == vertexError:
-          print "continua"
-          continue
-        else:
-#          numVertex = numVertex - 1
-          print "else"
-          snappedLine.addVertex(lineToSnap.getVertex(i))
-          print snappedLine.getNumVertices()
+      if vertex != None:
+        if lineToSnap.getVertex(0) == vertexError:
+          print "start"
+  #      if typeLine == "start":
+          snappedLine.addVertex(vertex)
+  
+        for i in range(0, numVertex):
+          print i
+          if lineToSnap.getVertex(i) == vertexError:
+            print "continue"
+            continue
+          else:
+            print "else"
+            snappedLine.addVertex(lineToSnap.getVertex(i))
+            print snappedLine.getNumVertices()
+  
+        if lineToSnap.getVertex(numVertex-1) == vertexError:
+          print "end"
+  #      if typeLine == "end":
+          snappedLine.addVertex(vertex)
 
-      if lineToSnap.getVertex(numVertex-1) == vertexError:
-        print "end"
-#      if typeLine == "end":
-        snappedLine.addVertex(vertex)
-#      for j in range(0, extendedLine.getNumVertices()):
-#        print extendedLine.getVertex(j)
+        print "update"
+        feature1 = feature1.getEditable()
+        feature1.set("GEOMETRY", snappedLine)
+        dataSet.update(feature1)
 
-      print "update"
-      feature1 = feature1.getEditable()
-      feature1.set("GEOMETRY", snappedLine)
-      dataSet.update(feature1)
+      else:
+        print "It can't snap"
       
     except:
       ex = sys.exc_info()[1]
