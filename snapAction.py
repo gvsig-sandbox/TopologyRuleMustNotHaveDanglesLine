@@ -94,47 +94,38 @@ class SnapAction(AbstractTopologyRuleAction):
 
       numVertexOtherLine = geoNearest.getNumVertices()
       print numVertexOtherLine
-      
-      disToSegment = float('inf')
-      if GeometryUtils.isSubtype(geom.MULTICURVE, geoNearest.getGeomtryType()):
-        for x in range(0, geoNearest.getNumPrimitives()):
-          geox = geoNearest.getPrimitiveAt(x)
-          numVertexMulti = geox.getNumVertices()
-          for i in range(0, numVertexMulti-1):
-            print "index ", i
-            vertex1 = geox.getVertex(i)
-            vertex2 = geox.getVertex(i+1)
-            segment = geoManager.createLine(subtype)
-            segment.addVertex(vertex1)
-            segment.addVertex(vertex2)
-            print segment.getNumVertices()
-    
-            dToSegment = vertexError.distance(segment)
-    
-            if dToSegment < disToSegment:
-              disToSegment = dToSegment
-              segmentNearest = segment
-              numSegment = i + 1
-              print disToSegment
-      else:
-        for i in range(0, numVertexOtherLine-1):
+
+      def segmentNearest(geometry, numVertexLine):
+        disToSegment = float('inf')
+        for i in range(0, numVertexLine-1):
           print "index ", i
-          vertex1 = geoNearest.getVertex(i)
-          vertex2 = geoNearest.getVertex(i+1)
+          vertex1 = geometry.getVertex(i)
+          vertex2 = geometry.getVertex(i+1)
           segment = geoManager.createLine(subtype)
           segment.addVertex(vertex1)
           segment.addVertex(vertex2)
           print segment.getNumVertices()
-  
+        
           dToSegment = vertexError.distance(segment)
-  
+        
           if dToSegment < disToSegment:
             disToSegment = dToSegment
             segmentNearest = segment
             numSegment = i + 1
             print disToSegment
 
-      print "Segment nearest is ", numSegment
+        return disToSegment, segmentNearest
+      
+      #disToSegment = float('inf')
+      if GeometryUtils.isSubtype(geom.MULTICURVE, geoNearest.getGeometryType().getSubType()):
+        for x in range(0, geoNearest.getNumPrimitives()):
+          geox = geoNearest.getPrimitiveAt(x)
+          numVertexMulti = geox.getNumVertices()
+          disToSegment, segmentNearest = segmentNearest(geox, numVertexMulti)
+      else:
+        disToSegment, segmentNearest = segmentNearest(geoNearest, numVertexOtherLine)
+
+      #print "Segment nearest is ", numSegment
       print "Distance nearest to segment is ", disToSegment
 
       dToVertex1 = vertexError.distance(segmentNearest.getVertex(0))
