@@ -9,6 +9,7 @@ from gvsig.commonsdialog import *
 import math
 from org.gvsig.fmap.geom import GeometryLocator
 from org.gvsig.fmap.geom import GeometryManager
+from org.gvsig.fmap.geom import GeometryUtils
 from org.gvsig.topology.lib.spi import AbstractTopologyRuleAction
 import sys
 
@@ -95,22 +96,43 @@ class SnapAction(AbstractTopologyRuleAction):
       print numVertexOtherLine
       
       disToSegment = float('inf')
-      for i in range(0, numVertexOtherLine-1):
-        print "index ", i
-        vertex1 = geoNearest.getVertex(i)
-        vertex2 = geoNearest.getVertex(i+1)
-        segment = geoManager.createLine(subtype)
-        segment.addVertex(vertex1)
-        segment.addVertex(vertex2)
-        print segment.getNumVertices()
-
-        dToSegment = vertexError.distance(segment)
-
-        if dToSegment < disToSegment:
-          disToSegment = dToSegment
-          segmentNearest = segment
-          numSegment = i + 1
-          print disToSegment
+      if GeometryUtils.isSubtype(geom.MULTICURVE, geoNearest.getGeomtryType()):
+        for x in range(0, geoNearest.getNumPrimitives()):
+          geox = geoNearest.getPrimitiveAt(x)
+          numVertexMulti = geox.getNumVertices()
+          for i in range(0, numVertexMulti-1):
+            print "index ", i
+            vertex1 = geox.getVertex(i)
+            vertex2 = geox.getVertex(i+1)
+            segment = geoManager.createLine(subtype)
+            segment.addVertex(vertex1)
+            segment.addVertex(vertex2)
+            print segment.getNumVertices()
+    
+            dToSegment = vertexError.distance(segment)
+    
+            if dToSegment < disToSegment:
+              disToSegment = dToSegment
+              segmentNearest = segment
+              numSegment = i + 1
+              print disToSegment
+      else:
+        for i in range(0, numVertexOtherLine-1):
+          print "index ", i
+          vertex1 = geoNearest.getVertex(i)
+          vertex2 = geoNearest.getVertex(i+1)
+          segment = geoManager.createLine(subtype)
+          segment.addVertex(vertex1)
+          segment.addVertex(vertex2)
+          print segment.getNumVertices()
+  
+          dToSegment = vertexError.distance(segment)
+  
+          if dToSegment < disToSegment:
+            disToSegment = dToSegment
+            segmentNearest = segment
+            numSegment = i + 1
+            print disToSegment
 
       print "Segment nearest is ", numSegment
       print "Distance nearest to segment is ", disToSegment
