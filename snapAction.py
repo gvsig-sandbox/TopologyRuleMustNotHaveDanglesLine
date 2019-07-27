@@ -87,6 +87,7 @@ class SnapAction(AbstractTopologyRuleAction):
           if dist<distance:
             distance = dist
             geoNearest = otherLine
+            featureToEdit = feature
             print distance
             geoName = feature.Name
 
@@ -117,7 +118,7 @@ class SnapAction(AbstractTopologyRuleAction):
         return disToSegment, segmentNearest
       
       #disToSegment = float('inf')
-      if GeometryUtils.isSubtype(geom.MULTICURVE, geoNearest.getGeometryType().getSubType()):
+      if GeometryUtils.isSubtype(geom.MULTICURVE, geoNearest.getGeometryType().getType()):
         for x in range(0, geoNearest.getNumPrimitives()):
           geox = geoNearest.getPrimitiveAt(x)
           numVertexMulti = geox.getNumVertices()
@@ -133,6 +134,8 @@ class SnapAction(AbstractTopologyRuleAction):
       dToVertex2 = vertexError.distance(segmentNearest.getVertex(1))
       print "dToVertex2 ", dToVertex2
 
+      perpendicular = False
+
       if dToVertex1<d or dToVertex2<d:
         if dToVertex1<dToVertex2:
           vertex = segmentNearest.getVertex(0)
@@ -144,19 +147,26 @@ class SnapAction(AbstractTopologyRuleAction):
           vertex = segmentNearest.getVertex(0)
           print "vertex 1"
       elif disToSegment < d:
+        perpendicular = True
         print "perpendicular"
-        try:
-          slope1 = (segmentNearest.getVertex(1).getY()-segmentNearest.getVertex(0).getY())/(segmentNearest.getVertex(1).getX()-segmentNearest.getVertex(0).getX())
-        except ZeroDivisionError:
+        
+        Iy = segmentNearest.getVertex(1).getY()-segmentNearest.getVertex(0).getY()
+        Ix = segmentNearest.getVertex(1).getX()-segmentNearest.getVertex(0).getX()
+
+        if Ix == 0:
           slope1 = float('inf')
+        else:
+          slope1 = Iy/Ix
+          
         b1 = segmentNearest.getVertex(0).getY() - slope1 * segmentNearest.getVertex(0).getX()
         print "straight line 1"
         print slope1, b1
 
-        try:
-          slope2 = -(1/slope1)
-        except ZeroDivisionError:
+        if slope1 == 0:
           slope2 = float('-inf')
+        else:
+          slope2 = -(1/slope1)
+          
         b2 = vertexError.getY() - slope2 * vertexError.getX()
 
         print "straight line 2"
@@ -201,7 +211,39 @@ class SnapAction(AbstractTopologyRuleAction):
   #      if typeLine == "end":
           snappedLine.addVertex(vertex)
 
-        print "update"
+        #print "update lineToSnap"
+        #feature1 = feature1.getEditable()
+        #feature1.set("GEOMETRY", snappedLine)
+        #dataSet.update(feature1)
+
+        if perpendicular == True:
+          subtype = geoNearest.getGeometryType().getSubType()
+          intersectedLine = geoManager.createLine(subtype)
+          for i in range(0, geoNearest.getNumVertices()-1):
+            vertex1 = geoNearest.getVertex(i)
+            vertex2 = geoNearest.getVertex(i + 1)
+            segment = geoManager.createLine(subtype)
+            segment.addVertex(vertex1)
+            segment.addVertex(vertex2)
+            print segment.getNumVertices()
+
+            if vertex.intersects(segment):
+              print "intersecta"
+              intersectedLine.addVertex(vertex1)
+              intersectedLine.addVertex(vertex)
+              intersectedLine.addVertex(vertex2)
+            else:
+              print "no intersecta"
+              intersectedLine.addVertex(vertex1)
+              intersectedLine.addVertex(vertex2)
+
+          print "update intersectedLine"
+          print intersectedLine.getNumVertices()
+          featureToEdit = featureToEdit.getEditable()
+          featureToEdit.set("GEOMETRY", intersectedLine)
+          dataSet.update(featureToEdit)
+
+        print "update lineToSnap"
         feature1 = feature1.getEditable()
         feature1.set("GEOMETRY", snappedLine)
         dataSet.update(feature1)
