@@ -29,7 +29,7 @@ class ExtendAction(AbstractTopologyRuleAction):
       "MustNotHaveDanglesLine", #MustNotHaveDanglesLineRuleFactory.NAME,
       "ExtendAction",
       "Extend Action",
-      ""#CAMBIAR
+      "This action will extend the dangling end of line features if they fix to ohter line features within a given distance. If the distance value is 0, lines will extend until they fix to a feature. If no feature is found, the feature will not extend and the error of feature remain on the Topology plan error inspector."
     )
   
   logger("1", LOGGER_INFO)
@@ -37,23 +37,17 @@ class ExtendAction(AbstractTopologyRuleAction):
     #TopologyRule rule, TopologyReportLine line, DynObject parameters
     try:
     
-      #logger("2", LOGGER_INFO)
       dataSet = rule.getDataSet1()
       
       while True:
         try:
           d = float(commonsdialog.inputbox("Enter a distance", title = "", messageType = IDEA, initialValue = "", root = None))
-          print "Dialog box: ", d
           if d == 0:
-            print "entra en d=0"
             envelope = dataSet.getFeatureStore().getEnvelope()
 
             if envelope is not None or not envelope.isEmpty():
-              print "entra en if del envelope"
               d = envelope.getLowerCorner().distance(envelope.getUpperCorner())
-              print d
             else:
-              print "entra al else del raise"
               raise Throwable("Not valid envelope")
           break
         except ValueError:
@@ -71,38 +65,36 @@ class ExtendAction(AbstractTopologyRuleAction):
       extendedLine = geoManager.createLine(subtype)
 
       numVertex = lineToExtend.getNumVertices()
-      print "1"
-
-      try:
-        print "2"
-        if lineToExtend.getVertex(0) == vertexError:
-          typeLine = "start"
-          Ay = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
-          Ax = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
-        else:
-          typeLine = "end"
-          Ay = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
-          Ax = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
-        slope = Ay/Ax
-        print "3"
-      except ZeroDivisionError:
-        if Ay>0:
+      
+      if lineToExtend.getVertex(0) == vertexError:
+        typeLine = "start"
+        Iy = -(lineToExtend.getVertex(1).getY()-lineToExtend.getVertex(0).getY())
+        Ix = -(lineToExtend.getVertex(1).getX()-lineToExtend.getVertex(0).getX())
+      else:
+        typeLine = "end"
+        Iy = lineToExtend.getVertex(numVertex-1).getY()-lineToExtend.getVertex(numVertex-2).getY()
+        Ix = lineToExtend.getVertex(numVertex-1).getX()-lineToExtend.getVertex(numVertex-2).getX()
+        
+      if Ix == 0 or Ix == -0:
+        if Iy>0:
           slope = float('inf')
         else:
           slope = float('-inf')
-        
+      else:
+        slope = Iy/Ix
+
       if slope>0:
-        if Ay>0:
+        if Iy>0:
           ang = math.degrees(math.atan(slope))
         else:
           ang = math.degrees(math.atan(slope)) + 180
       elif slope<0:
-        if Ay>0:
+        if Iy>0:
           ang = math.degrees(math.atan(slope)) + 180
         else:
           ang = math.degrees(math.atan(slope)) + 360
       elif slope == 0:
-        if Ax > 0:
+        if Ix > 0:
           ang = math.degrees(math.atan(slope))
         else:
           ang = math.degrees(math.atan(slope)) + 180
@@ -131,14 +123,10 @@ class ExtendAction(AbstractTopologyRuleAction):
         if (segment.intersects(otherLine) and not vertexError.intersects(otherLine)):
           iP = segment.intersection(otherLine)
           dist = vertexError.distance(otherLine)
-          print iP
-          print dist
 
           if dist<distance:
             distance = dist
             intersectionPoint = iP
-            print "Intersection Point is ", intersectionPoint
-            print distance
 
       print "final intersection ", intersectionPoint
 
@@ -146,13 +134,10 @@ class ExtendAction(AbstractTopologyRuleAction):
         extendedLine.addVertex(intersectionPoint)
 
       for i in range(0, numVertex):
-#        print i
         extendedLine.addVertex(lineToExtend.getVertex(i))
 
       if typeLine == "end":
         extendedLine.addVertex(intersectionPoint)
-#      for j in range(0, extendedLine.getNumVertices()):
-#        print extendedLine.getVertex(j)
 
       feature1 = feature1.getEditable()
       feature1.set("GEOMETRY", extendedLine)

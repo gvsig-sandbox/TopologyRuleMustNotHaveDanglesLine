@@ -28,7 +28,7 @@ class MustNotHaveDanglesLineRuleFactory(AbstractTopologyRuleFactory):
       self,
       "MustNotHaveDanglesLine",
       "Must Not Have Dangles", 
-      "Requires ...", 
+      "Requires that a line feature must touch line features from the same layer at both ends. An endpoint that is not connected to another line is an error, called dangle, although there are exceptions. Therefore, the anchors or intersections of the linear elements must be solved correctly, based on semantic criteria, such as line direction, and tolerance in each case, so that there are no free ends by overshoot and undershoot.", 
       ListBuilder().add(Geometry.TYPES.LINE).add(Geometry.TYPES.MULTILINE).asList()
       )
   def createRule(self, plan, dataSet1, dataSet2, tolerance):

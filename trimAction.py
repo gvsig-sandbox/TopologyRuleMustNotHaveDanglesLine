@@ -28,38 +28,30 @@ class TrimAction(AbstractTopologyRuleAction):
       "MustNotHaveDanglesLine", #MustNotHaveDanglesLineRuleFactory.NAME,
       "TrimAction",
       "Trim Action",
-      ""#CAMBIAR
+      "This action will trim dangling line features if a point of intersection is found within a given distance, otherwise the feature will not be trimmed."
     )
   
-  logger("1", LOGGER_INFO)
   def execute(self, rule, line, parameters):
     #TopologyRule rule, TopologyReportLine line, DynObject parameters
     try:
     
-      #logger("2", LOGGER_INFO)
       dataSet = rule.getDataSet1()
       
       while True:
         try:
           d = float(commonsdialog.inputbox("Enter a distance", title = "", messageType = IDEA, initialValue = "", root = None))
-          print "Dialog box: ", d
           if d == 0:
-            print "entra en d=0"
             envelope = dataSet.getFeatureStore().getEnvelope()
 
             if envelope is not None or not envelope.isEmpty():
-              print "entra en if del envelope"
               d = envelope.getLowerCorner().distance(envelope.getUpperCorner())
-              print d
             else:
-              print "entra al else del raise"
               raise Throwable("Not valid envelope")
           break
         except ValueError:
           print("The entered values are not correct. Try again")
 
       vertexError = geom.createGeometryFromWKT(line.getData())
-      print vertexError
       
       reference = line.getFeature1()
       feature1 = reference.getFeature()
@@ -82,41 +74,27 @@ class TrimAction(AbstractTopologyRuleAction):
         if (lineToTrim.intersects(otherLine) and not lineToTrim.equals(otherLine)):
           iP = lineToTrim.intersection(otherLine)
           dist = vertexError.distance(iP)
-          print iP
-          print dist
 
           if dist<distance:
             distance = dist
             intersectionPoint = iP
-            print "Intersection Point is ", intersectionPoint
-            print distance
 
       print "final intersection ", intersectionPoint
 
       if lineToTrim.getVertex(0) == vertexError:
-        print "start"
-#      if typeLine == "start":
+        #typeLine == "start"
         trimmedLine.addVertex(intersectionPoint)
 
       for i in range(0, numVertex):
-        print i
         if lineToTrim.getVertex(i) == vertexError:
-          print "continua"
           continue
         else:
-#          numVertex = numVertex - 1
-          print "else"
           trimmedLine.addVertex(lineToTrim.getVertex(i))
-          print trimmedLine.getNumVertices()
 
       if lineToTrim.getVertex(numVertex-1) == vertexError:
-        print "end"
-#      if typeLine == "end":
+        #typeLine == "end"
         trimmedLine.addVertex(intersectionPoint)
-#      for j in range(0, extendedLine.getNumVertices()):
-#        print extendedLine.getVertex(j)
 
-      print "update"
       feature1 = feature1.getEditable()
       feature1.set("GEOMETRY", trimmedLine)
       dataSet.update(feature1)
