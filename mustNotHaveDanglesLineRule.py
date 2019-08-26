@@ -17,9 +17,7 @@ from org.gvsig.expressionevaluator import ExpressionEvaluatorLocator
 
 from ExtendAction import ExtendAction
 from TrimAction import TrimAction
-from SnapAction import SnapAction
-from ScriptUpdate import ScriptUpdate
-#from ScriptUpdate import ScriptUpdate
+#from SnapAction import SnapAction
 
 
 class MustNotHaveDanglesLineRule(AbstractTopologyRule):
@@ -37,9 +35,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
     AbstractTopologyRule.__init__(self, plan, factory, tolerance, dataSet1)
     self.addAction(ExtendAction())
     self.addAction(TrimAction())
-    self.addAction(SnapAction())
-    self.addAction(ScriptUpdate())
-#    self.addAction(ScriptUpdate())
+    #self.addAction(SnapAction())
   
   def check(self, taskStatus, report, feature1):
     #SimpleTaskStatus taskStatus, 
@@ -134,7 +130,7 @@ class MustNotHaveDanglesLineRule(AbstractTopologyRule):
             )
 
           else:
-            print "Intersecta"
+            print "Intersects"
             
       else:
         logger("else", LOGGER_INFO)
