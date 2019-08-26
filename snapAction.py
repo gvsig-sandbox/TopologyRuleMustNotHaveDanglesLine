@@ -30,7 +30,7 @@ class SnapAction(AbstractTopologyRuleAction):
       "MustNotHaveDanglesLine", #MustNotHaveDanglesLineRuleFactory.NAME,
       "SnapAction",
       "Snap Action",
-      ""#CAMBIAR
+      "This action will snap dangling line features to the nearest line feature within a given distance. If no line feature is found, the line will not be snapped. First, they will try to snap endpoints to the vertices, and secondly to the edge of line features."
     )
   
   logger("1", LOGGER_INFO)
