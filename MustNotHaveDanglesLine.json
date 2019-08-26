@@ -1,0 +1,45 @@
+{
+    "id": "MustNotHaveDanglesLine",
+    "name": "Must Not Have Dangles",
+    "description": [ 
+        "<img src=\"@@@_d/must_not_have_dangles_line.png\">\n", 
+        "Requires that a line feature must touch line features from the same layer",
+		"at both ends. An endpoint that is not connected to another line is an error,",
+		"called dangle, although there are exceptions. Therefore, the anchors or",
+		"intersections ot the linear elements must be solved correctly, based on",
+		"semantic criteria, such as line direction, and tolerance in each case, so that",
+		"there are no free ends by ovsershoot and undershoot."
+    ],
+    "actions" : {
+        "ExtendAction": {
+            "name" : "Extend Action",
+            "description": [ 
+                "This action extends the dangling end of line features if they fix",
+                "to other line features within a given distance. If the distance value",
+                "is 0, lines extend until they fix to a feature. If no feature is found",
+                "the feature will not extend and the error of feature remain on the", 
+                "Topology plan error inspector.",
+                "This fix can be applied to one or more Must Not Have Dangles errors."
+            ]
+        },
+        "TrimAction": {
+            "name" : "Trim Action",
+            "description": [ 
+                "This action trims the dangling line features if a point of intersection",
+				"is found within a given distance, otherwise the feature will not be trimmed.",
+                "This fix can be applied to one or more Must Not Have Dangles errors."
+            ]
+        },
+		"SnapAction": {
+            "name" : "Snap Action",
+            "description": [ 
+                "This action snaps dangling line features to the nearest line",
+                "feature within a given distance. If no line feature is found,",
+				"the line will not be snapped. First, they will try to snap",
+				"endpoints to the vertices, and secondly to the edge of line features.",
+                "This fix can be applied to one or more Must Not Have Dangles errors."
+            ]
+        }
+    }
+}
+
